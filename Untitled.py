@@ -4,132 +4,61 @@
 # In[1]:
 
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import seaborn as sns
-import warnings
-from pylab import rcParams
-from scipy.stats import f_oneway
-from scipy.stats import ttest_ind
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+from scipy import stats
+from scipy.stats import f
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
 
 
 # In[2]:
 
 
-get_ipython().run_line_magic('matplotlib', 'inline')
-warnings.filterwarnings("ignore")
-rcParams['figure.figsize']=20,10
-rcParams['font.size']=30
-sns.set()
-np.random.seed(8)
+a=[4,3,2]
+b=[2,4,6]
+c=[2,1,3]
 
 
 # In[3]:
 
 
-def plot_distribution(inp):
-    plt.figure()
-    ax=sns.distplot(inp)
-    plt.axvline(np.mean(inp),color="k",linestyle="dashed",linewidth=5)
-    _,max_=plt.ylim()
-    plt.text(
-    inp.mean()+inp.mean()/10,
-    max_-max_/10,
-    "Mean:{:.2f}".format(inp.mean())
-    )
-    return plt.figure
-
-
-# In[4]:
-
-
-ger_sales=np.load("C:/Users/User/Downloads/germany_sales.npy")
-
-
-# In[5]:
-
-
-ger_sales=np.load("C:/Users/User/Downloads/germany_sales.npy")
+stats.f_oneway(a,b,c)
 
 
 # In[6]:
 
 
-ger_sales=np.load("C:/Users/User/Downloads/germany_sales.npy")
+data=pd.read_excel('C:/Users/User/Downloads/oneway.xlsx')
 
 
 # In[7]:
 
 
-ger_sales
-
-
-# In[8]:
-
-
-len(ger_sales)
+data
 
 
 # In[9]:
 
 
-plot_distribution(ger_sales)
+data_new = pd.melt(data.reset_index(), id_vars = ['index'], value_vars = ['teachingmethodology1', 'teachingmethodology2', 'teachingmethodology3'])
+data_new.columns = ['index', 'Treatments', 'value']
 
 
 # In[10]:
 
 
-fr_sales=np.load("C:/Users/User/Downloads/france_sales.npy")
+data_new
 
 
 # In[11]:
 
 
-fr_sales
-
-
-# In[12]:
-
-
-len(fr_sales)
-
-
-# In[13]:
-
-
-plot_distribution(fr_sales)
-
-
-# In[14]:
-
-
-plt.figure()
-ax1=sns.distplot(fr_sales)
-ax2=sns.distplot(ger_sales)
-plt.axvline(np.mean(fr_sales),color='b',linestyle="dashed",linewidth=5)
-plt.axvline(np.mean(ger_sales),color='orange',linestyle="dashed",linewidth=5)
-
-
-# In[15]:
-
-
-def compare_2_groups(arr_1, arr_2, alpha, sample_size):
-    stat, p=ttest_ind(arr_1, arr_2)
-    print('Statistics=%.3f,p=%.3f'%(stat,p))
-    if p > alpha:
-        print('same distributions(fail to reject H0)')
-    else:
-            print('Different distributions(reject H0)')
-
-
-# In[16]:
-
-
-sample_size=15
-ger_sampled=np.random.choice(ger_sales,sample_size)
-fr_sampled=np.random.choice(fr_sales,sample_size)
-compare_2_groups(ger_sampled,fr_sampled,0.05,sample_size)
+model = ols('value ~ C(Treatments)',data = data_new).fit()
+anova_table = sm.stats.anova_lm(model, typ = 1)
+anova_table
 
 
 # In[ ]:
